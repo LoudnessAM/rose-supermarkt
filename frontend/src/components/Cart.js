@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Form, Card, Row, Col } from 'react-bootstrap';
 import { BsTrash, BsArrowLeft, BsCheck2Circle } from 'react-icons/bs';
 import { Link } from 'react-router-dom';
+import { API_BASE_URL } from '../config'; // 👈 zentrale API-URL
 
 function Cart() {
   const [cart, setCart] = useState([]);
@@ -25,6 +26,12 @@ function Cart() {
     const sum = cart.reduce((acc, item) => acc + parseFloat(item.price) * item.quantity, 0);
     setTotal(sum);
   }, [cart]);
+
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return 'https://via.placeholder.com/50?text=Bild';
+    if (imagePath.startsWith('http')) return imagePath;
+    return `${API_BASE_URL}${imagePath.startsWith('/') ? imagePath : '/' + imagePath}`;
+  };
 
   const updateQuantity = (id, newQuantity) => {
     if (newQuantity < 1) return;
@@ -108,7 +115,7 @@ function Cart() {
                       <td className="align-middle">
                         <div className="d-flex align-items-center">
                           <img
-                            src={item.image.startsWith('http') ? item.image : `http://127.0.0.1:8000${item.image}`}
+                            src={getImageUrl(item.image)}
                             alt={item.name}
                             style={{ width: '50px', height: '50px', objectFit: 'cover', marginRight: '10px' }}
                             onError={(e) => {

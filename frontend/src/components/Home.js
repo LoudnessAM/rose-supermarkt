@@ -1,55 +1,79 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Card } from 'react-bootstrap';
+import { Container, Row, Col, Card, Alert } from 'react-bootstrap';
 import axios from 'axios';
-import logo from '../assets/final_logo_rose.jpg';
+import { API_BASE_URL } from '../config'; // 👈 zentrale URL-Variable
 
 function Home() {
   const [offers, setOffers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return 'https://via.placeholder.com/800x600?text=Angebot';
+    if (imagePath.startsWith('http')) return imagePath;
+    return `${API_BASE_URL}${imagePath.startsWith('/') ? imagePath : '/' + imagePath}`;
+  };
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/api/offers/')
-      .then(res => setOffers(res.data))
-      .catch(err => console.error('Fehler beim Laden der Angebote:', err));
+    setLoading(true);
+    axios.get(`${API_BASE_URL}/offers/`) // 👈 neue dynamische API-URL
+      .then(res => {
+        setOffers(res.data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Fehler beim Laden der Angebote:', err);
+        setError('Angebote konnten nicht geladen werden. Bitte versuchen Sie es später erneut.');
+        setLoading(false);
+      });
   }, []);
 
   return (
-    <Container className="text-center mt-4">
-      <img
-        src={logo}
-        alt="Supermarkt Rose Logo"
-        style={{ maxWidth: '300px', marginBottom: '30px' }}
-      />
+    <Container fluid className="p-0">
+      <div className="text-white text-center py-2" style={{ 
+        background: 'linear-gradient(to right, #f8bbd0, #f48fb1)',
+        borderBottom: '2px solid #b71c1c'
+      }}>
+        <h2 className="mb-0 fs-4">Herzlich Willkommen! <span className="ms-2">خوش آمدید</span></h2>
+      </div>
 
-      <h2 className="mb-4 fw-bold">Aktuelle Angebote</h2>
+      <Container className="my-4">
+        <h2 className="text-center mb-4 fw-bold">Aktuelle Angebote</h2>
 
-      <Row className="g-4 justify-content-center">
-        {offers.length === 0 ? (
-          <p className="text-muted">Momentan sind keine Angebote verfügbar.</p>
+        {error && <Alert variant="danger">{error}</Alert>}
+
+        {loading ? (
+          <p className="text-center">Angebote werden geladen...</p>
+        ) : offers.length === 0 ? (
+          <Alert variant="info" className="text-center">Momentan sind keine Angebote verfügbar.</Alert>
         ) : (
-          offers.map((offer, index) => (
-            <Col md={4} sm={6} xs={12} key={index}>
-              <Card className="h-100 shadow-sm">
-                <Card.Img
-                  variant="top"
-                  src={`http://127.0.0.1:8000${offer.image.startsWith('/media') ? offer.image : '/media/' + offer.image}`}
-                  alt={offer.title}
-                  style={{ objectFit: 'cover', height: '250px' }}
-                  onError={(e) => {
-                    e.target.src = 'https://via.placeholder.com/300x250?text=Kein+Bild';
-                  }}
-                />
-                <Card.Body>
-                  <Card.Title>{offer.title}</Card.Title>
-                  <Card.Text>{offer.description}</Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))
+          <Row className="g-4 justify-content-center">
+            {offers.map((offer, index) => (
+              <Col md={4} sm={6} xs={12} key={index}>
+                <Card className="h-100 shadow offer-card">
+                  <div className="offer-image-container">
+                    <Card.Img
+                      variant="top"
+                      src={getImageUrl(offer.image)}
+                      alt={offer.title}
+                      className="offer-image"
+                      onError={(e) => {
+                        e.target.src = 'https://via.placeholder.com/600x800?text=Angebot';
+                      }}
+                    />
+                  </div>
+                  <Card.Body>
+                    <Card.Title className="fw-bold fs-4">{offer.title}</Card.Title>
+                    <Card.Text>{offer.description}</Card.Text>
+                  </Card.Body>
+                </Card>
+              </Col>
+            ))}
+          </Row>
         )}
-      </Row>
+      </Container>
     </Container>
   );
 }
 
 export default Home;
-

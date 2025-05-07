@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { BsCart3, BsGrid } from 'react-icons/bs';
 import logo from '../assets/final_logo_rose.jpg';
 import '../App.css';
+import { API_BASE_URL } from '../config'; // 👈 eingebunden für spätere API-Nutzung
 
 function Navigation() {
   const [cartItems, setCartItems] = useState(0);
