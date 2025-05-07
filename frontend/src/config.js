@@ -4,11 +4,14 @@ const API_BASE_URL = process.env.REACT_APP_API_URL ||
         ? 'https://rose-supermarkt.onrender.com/api'  // Dies wird durch die REACT_APP_API_URL ersetzt
         : 'http://127.0.0.1:8000/api');
 
-// Bildpfad-Hilfsfunktion
+// Bildpfad-Hilfsfunktion - korrigiert für korrekte URL-Konstruktion
 const getImageUrl = (imagePath) => {
   if (!imagePath) return 'https://via.placeholder.com/300?text=Kein+Bild';
   if (imagePath.startsWith('http')) return imagePath;
-  return `${API_BASE_URL.replace('/api', '')}${imagePath.startsWith('/') ? imagePath : '/' + imagePath}`;
+  
+  // Entfernt das /api vom Pfad nur für Medien-URLs
+  const baseUrl = API_BASE_URL.replace('/api', '');
+  return `${baseUrl}${imagePath.startsWith('/') ? imagePath : '/' + imagePath}`;
 };
 
 export { API_BASE_URL, getImageUrl };

@@ -88,6 +88,20 @@ DATABASES = {
 }
 
 
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')),
+        conn_max_age=600
+    )
+}
+
+# Stellen Sie sicher, dass SQLite-Datenbank richtig eingerichtet ist, wenn sie verwendet wird
+if 'sqlite' in DATABASES['default']['ENGINE']:
+    print("SQLite wird verwendet. Datenbank-Pfad:", DATABASES['default']['NAME'])
+    
+    # Stelle sicher, dass der Datenbankordner existiert
+    os.makedirs(os.path.dirname(DATABASES['default']['NAME']), exist_ok=True)
+
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
