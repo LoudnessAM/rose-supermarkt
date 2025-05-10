@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: rose-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn inventory_system.wsgi:application
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: inventory_system.settings
+      - key: SECRET_KEY
+        value: 'django-insecure-27!um#zv+vy#2)qaenq-s#5v%u855nv@lnhybd3zr^8unxm4kt'
+      - key: DEBUG
+        value: False

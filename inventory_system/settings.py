@@ -9,6 +9,8 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
+from dotenv import load_dotenv
+load_dotenv()
 
 import os
 import dj_database_url
@@ -80,19 +82,21 @@ WSGI_APPLICATION = 'inventory_system.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+# Datenbankkonfiguration: Automatisch PostgreSQL verwenden, wenn DATABASE_URL gesetzt ist
+if os.environ.get('DATABASE_URL'):
+    DATABASES = {
+        'default': dj_database_url.config(conn_max_age=600)
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
-# Stellen Sie sicher, dass SQLite-Datenbank richtig eingerichtet ist, wenn sie verwendet wird
-if 'sqlite' in DATABASES['default']['ENGINE']:
+    # SQLite-Ordner sicherstellen
     print("SQLite wird verwendet. Datenbank-Pfad:", DATABASES['default']['NAME'])
-    
-    # Stelle sicher, dass der Datenbankordner existiert
     os.makedirs(os.path.dirname(DATABASES['default']['NAME']), exist_ok=True)
 
 # Password validation
