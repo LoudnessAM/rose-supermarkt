@@ -1,23 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Alert } from 'react-bootstrap';
 import axios from 'axios';
-import { API_BASE_URL } from '../config'; // 👈 zentrale URL-Variable
+import { API_BASE_URL } from '../config'; // Nur API_BASE_URL importieren
 
 function Home() {
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Lokale getImageUrl-Funktion
   const getImageUrl = (imagePath) => {
     if (!imagePath) return 'https://via.placeholder.com/800x600?text=Angebot';
     if (imagePath.startsWith('http')) return imagePath;
-    return `${API_BASE_URL}${imagePath.startsWith('/') ? imagePath : '/' + imagePath}`;
+    
+    // Entferne das /api vom Pfad für Medien-URLs
+    const baseUrl = API_BASE_URL.replace('/api', '');
+    return `${baseUrl}${imagePath.startsWith('/') ? imagePath : '/' + imagePath}`;
   };
 
   useEffect(() => {
     setLoading(true);
-    axios.get(`${API_BASE_URL}/offers/`) // 👈 neue dynamische API-URL
+    axios.get(`${API_BASE_URL}/offers/`)
       .then(res => {
+        console.log('Angebote geladen:', res.data); // Debugging
         setOffers(res.data);
         setLoading(false);
       })
@@ -48,27 +53,34 @@ function Home() {
           <Alert variant="info" className="text-center">Momentan sind keine Angebote verfügbar.</Alert>
         ) : (
           <Row className="g-4 justify-content-center">
-            {offers.map((offer, index) => (
-              <Col md={4} sm={6} xs={12} key={index}>
-                <Card className="h-100 shadow offer-card">
-                  <div className="offer-image-container">
-                    <Card.Img
-                      variant="top"
-                      src={getImageUrl(offer.image)}
-                      alt={offer.title}
-                      className="offer-image"
-                      onError={(e) => {
-                        e.target.src = 'https://via.placeholder.com/600x800?text=Angebot';
-                      }}
-                    />
-                  </div>
-                  <Card.Body>
-                    <Card.Title className="fw-bold fs-4">{offer.title}</Card.Title>
-                    <Card.Text>{offer.description}</Card.Text>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))}
+            {offers.map((offer, index) => {
+              // Debugging: Bild-URL-Konstruktion
+              const imageUrl = getImageUrl(offer.image);
+              console.log(`Angebot ${index} Bild-URL:`, imageUrl);
+              
+              return (
+                <Col md={4} sm={6} xs={12} key={index}>
+                  <Card className="h-100 shadow offer-card">
+                    <div className="offer-image-container">
+                      <Card.Img
+                        variant="top"
+                        src={imageUrl}
+                        alt={offer.title}
+                        className="offer-image"
+                        onError={(e) => {
+                          console.log(`Fehler beim Laden des Bildes für Angebot ${index}`, e);
+                          e.target.src = 'https://via.placeholder.com/600x800?text=Angebot';
+                        }}
+                      />
+                    </div>
+                    <Card.Body>
+                      <Card.Title className="fw-bold fs-4">{offer.title}</Card.Title>
+                      <Card.Text>{offer.description}</Card.Text>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              );
+            })}
           </Row>
         )}
       </Container>

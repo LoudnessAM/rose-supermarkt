@@ -22,8 +22,6 @@ class Product(models.Model):
     def __str__(self):
         return self.name
     
-# products/models.py
-from django.db import models
 
 class SpecialOffer(models.Model):
     title = models.CharField(max_length=100)
